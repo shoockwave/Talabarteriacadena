@@ -1,0 +1,752 @@
+/* ============================================================
+   TALABARTERÍA CADENA — styles.css  v3.0
+   Paleta: Noir obsidiana · Oro champagne · Cognac
+   Referencia estética: Hermès · YSL · Berluti
+   
+   CAMBIOS v3.0:
+   [FIX-01] Variables CSS completadas: --noir-s faltante corregido
+   [FIX-02] wa-float: convertido a pill funcional con ícono visible
+   [FIX-03] ba-container: slider before/after corregido para móvil
+   [FIX-04] Sistema botones: homogeneizado, un único origen de verdad
+   [FIX-05] Font families: quotes correctas en valores CSS custom prop
+   [FIX-06] Animaciones: añadido will-change para suavidad
+   [FIX-07] Responsive: breakpoints unificados sin !important innecesarios
+   [FIX-08] .section-icon: nuevo componente unificado para íconos de sección
+   [FIX-09] .soc-pill: componente de red social corregido
+   [FIX-10] Todos los colores usan variables, sin hardcode duplicado
+   ============================================================ */
+
+/* ─── 01 · VARIABLES GLOBALES ─────────────────────────────────
+   Fuente única de verdad para colores, tipografía y timing.
+   Todos los componentes consumen estas variables.
+   [FIX-01] Corregido: --noir-s, --fb y --fd con sintaxis correcta
+   ─────────────────────────────────────────────────────────────── */
+:root {
+  /* Negros / fondos */
+  --noir:   #0D0B09;
+  --noir-m: #161310;
+  --noir-s: #1F1A15;
+
+  /* Dorados — acento principal */
+  --oro:    #B8965A;
+  --oro-c:  #D4AF72;
+  --oro-o:  #8C6E3E;
+
+  /* Cognac — identidad de marca */
+  --cognac: #7A3E22;
+
+  /* Cremas — texto */
+  --crema:  #F0E8D8;
+  --crema-a:#A89880;
+
+  /* Tipografía [FIX-05] sin comillas anidadas en custom prop */
+  --fd: "Cormorant Garamond", serif;
+  --fb: "Jost", sans-serif;
+
+  /* Easing y duraciones */
+  --es: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --d1: 0.2s;
+  --d2: 0.3s;
+  --d3: 0.5s;
+  --d4: 0.85s;
+
+  /* Shared border-radius pill */
+  --br: 9999px;
+}
+
+/* ─── 02 · RESET & BASE ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--fb);
+  background: var(--noir);
+  color: var(--crema);
+  overflow-x: hidden;
+}
+
+/* Respeta prefers-reduced-motion — accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:   0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:  0.01ms !important;
+  }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar        { width: 3px; }
+::-webkit-scrollbar-track  { background: var(--noir); }
+::-webkit-scrollbar-thumb  { background: var(--oro-o); border-radius: 0; }
+
+/* Selección de texto */
+::selection { background: var(--oro); color: var(--noir); }
+
+/* Focus accesible global */
+:focus-visible { outline: 1px solid var(--oro); outline-offset: 3px; }
+
+/* Tipografía de display */
+h1, h2, h3, blockquote {
+  font-family: var(--fd);
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── 03 · TEXTURA GRAIN ──────────────────────────────────────── */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999; opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+
+/* ─── 04 · SISTEMA DE BOTONES — Pill unificado ────────────────────
+   [FIX-04] Un único origen de verdad para todos los botones.
+   Misma altura, padding, tipografía y radio. Sin duplicados.
+   ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 44px;
+  padding: 0 1.75rem;
+  border-radius: var(--br);
+  font-family: var(--fb);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  /* [FIX-06] will-change para GPU compositing */
+  will-change: transform, opacity;
+  transition:
+    background     var(--d2) var(--es),
+    color          var(--d2) var(--es),
+    border-color   var(--d2) var(--es),
+    box-shadow     var(--d2) var(--es),
+    transform      var(--d2) var(--es);
+  position: relative;
+  overflow: hidden;
+}
+.btn:active { transform: scale(0.97); }
+
+/* Flecha animada dentro de botones */
+.btn .arr { transition: transform var(--d2) var(--es); }
+.btn:hover .arr { transform: translateX(4px); }
+
+/* Variante Oro — CTA principal */
+.btn-oro {
+  background: var(--oro);
+  color: var(--noir);
+  border-color: var(--oro);
+}
+.btn-oro:hover, .btn-oro:focus-visible {
+  background: var(--oro-c);
+  border-color: var(--oro-c);
+  box-shadow: 0 4px 24px rgba(184,150,90,0.4);
+}
+
+/* Variante Outline — sobre fondos oscuros */
+.btn-outline {
+  background: transparent;
+  color: var(--oro);
+  border-color: rgba(184,150,90,0.5);
+}
+.btn-outline:hover, .btn-outline:focus-visible {
+  background: var(--oro);
+  color: var(--noir);
+  border-color: var(--oro);
+}
+
+/* Variante Ghost — texto sutil sin borde */
+.btn-ghost {
+  background: transparent;
+  color: rgba(240,232,216,0.5);
+  border-color: transparent;
+}
+.btn-ghost:hover, .btn-ghost:focus-visible { color: var(--crema); }
+
+/* ─── 05 · BOTÓN NAVBAR — versión compacta ────────────────────── */
+.btn-nav {
+  height: 34px;
+  padding: 0 1.1rem;
+  border-radius: var(--br);
+  font-family: var(--fb);
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--oro);
+  border: 1px solid rgba(184,150,90,0.4);
+  background: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background   var(--d2) var(--es),
+    color        var(--d2) var(--es),
+    border-color var(--d2) var(--es);
+}
+.btn-nav:hover, .btn-nav:focus-visible {
+  background: var(--oro);
+  color: var(--noir);
+  border-color: var(--oro);
+}
+
+/* ─── 06 · WHATSAPP FLOTANTE — Pill Hermès ────────────────────────
+   [FIX-02] Reescrito desde cero. Era un cuadrado porque le faltaba
+   el ícono correcto y los estilos de display. Ahora es pill con
+   texto en desktop y círculo en móvil, sin borde box cuadrado.
+   ─────────────────────────────────────────────────────────────── */
+.wa-float {
+  /* Posicionamiento fijo */
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+
+  /* Layout pill */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  height: 46px;
+  padding: 0 1.4rem;
+  border-radius: var(--br);
+
+  /* Visual Hermès: noir con borde oro */
+  background: var(--noir-s);
+  border: 1px solid rgba(184,150,90,0.5);
+  color: var(--oro);
+  text-decoration: none;
+
+  /* Tipografía */
+  font-family: var(--fb);
+  font-size: 0.625rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  /* Sombra */
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(184,150,90,0.06);
+
+  /* Animación */
+  will-change: transform, background;
+  transition:
+    background  var(--d2) var(--es),
+    color       var(--d2) var(--es),
+    box-shadow  var(--d2) var(--es),
+    transform   var(--d2) var(--es);
+}
+.wa-float:hover, .wa-float:focus-visible {
+  background: var(--oro);
+  color: var(--noir);
+  box-shadow: 0 12px 40px rgba(184,150,90,0.3);
+  transform: translateY(-2px);
+}
+/* Ícono dentro del botón WA */
+.wa-float .ico {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+/* En móvil colapsa a círculo — solo ícono */
+@media (max-width: 640px) {
+  .wa-float {
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+  .wa-float .wa-label { display: none; }
+}
+
+/* ─── 07 · NAVBAR ─────────────────────────────────────────────── */
+#navbar {
+  background: transparent;
+  transition:
+    background   var(--d3) var(--es),
+    border-color var(--d3) ease,
+    box-shadow   var(--d3) ease;
+}
+#navbar.scrolled {
+  background: rgba(13,11,9,0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(184,150,90,0.1);
+  box-shadow: 0 1px 40px rgba(0,0,0,0.5);
+}
+
+/* Links de navegación */
+.nav-link {
+  position: relative;
+  transition: color var(--d1) ease;
+  text-decoration: none;
+}
+.nav-link.active { color: var(--oro) !important; }
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; left: 0; right: 0;
+  height: 1px;
+  background: var(--oro);
+  opacity: 0.5;
+}
+
+/* ─── 08 · MENÚ MÓVIL ─────────────────────────────────────────── */
+#mobileMenu {
+  background: rgba(13,11,9,0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(184,150,90,0.08);
+  animation: slideDown var(--d2) var(--es);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mob-link {
+  display: block;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(184,150,90,0.07);
+  text-decoration: none;
+  transition: color var(--d1) ease, padding-left var(--d2) ease;
+}
+.mob-link:hover { padding-left: 0.5rem; }
+
+/* Hamburger → X */
+#menuBtn .bar1,
+#menuBtn .bar2,
+#menuBtn .bar3 {
+  display: block;
+  transition: transform var(--d2) var(--es), opacity var(--d2) ease;
+}
+#menuBtn.open .bar1 { transform: translateY(7px) rotate(45deg); }
+#menuBtn.open .bar2 { opacity: 0; transform: translateX(8px); }
+#menuBtn.open .bar3 { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── 09 · HERO ───────────────────────────────────────────────── */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--noir);
+}
+.hero-img {
+  position: absolute; inset: 0; z-index: 1;
+}
+.hero-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 60% center;
+}
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(
+    105deg,
+    rgba(13,11,9,0.00) 0%,
+    rgba(13,11,9,0.15) 30%,
+    rgba(13,11,9,0.75) 65%,
+    rgba(13,11,9,0.96) 100%
+  );
+}
+.hero-content  { position: relative; z-index: 3; }
+.hero-accent {
+  position: absolute; left: 3rem; top: 0; bottom: 0;
+  width: 1px; z-index: 3;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(184,150,90,0.2) 30%,
+    rgba(184,150,90,0.2) 70%,
+    transparent
+  );
+}
+
+/* Animaciones hero */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  opacity: 0;
+  animation: fadeUp 0.9s var(--es) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes scrollLine {
+  0%, 100% { transform: scaleY(1);    opacity: 0.35; }
+  50%       { transform: scaleY(0.4); opacity: 0.70; }
+}
+.scroll-line {
+  animation: scrollLine 2.5s ease-in-out infinite;
+  transform-origin: top;
+}
+
+/* Hero en móvil: overlay más oscuro para legibilidad */
+@media (max-width: 768px) {
+  .hero-overlay {
+    background: linear-gradient(
+      160deg,
+      rgba(13,11,9,0.30) 0%,
+      rgba(13,11,9,0.70) 50%,
+      rgba(13,11,9,0.97) 100%
+    );
+  }
+  .hero-section h1 { font-size: clamp(2.8rem, 11vw, 5rem); }
+}
+
+/* ─── 10 · SCROLL REVEAL ──────────────────────────────────────── */
+.js .rv, .js .rvl, .js .rvr {
+  opacity: 0;
+  will-change: opacity, transform;
+  transition:
+    opacity   var(--d4) var(--es),
+    transform var(--d4) var(--es);
+  transition-delay: var(--delay, 0s);
+}
+.js .rv  { transform: translateY(40px); }
+.js .rvl { transform: translateX(-40px); }
+.js .rvr { transform: translateX(40px); }
+.js .rv.vis, .js .rvl.vis, .js .rvr.vis {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* ─── 11 · CATÁLOGO ───────────────────────────────────────────── */
+.lb-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.lb-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.88) contrast(1.05);
+  transition: transform 0.7s var(--es), filter 0.7s ease;
+  will-change: transform;
+}
+.lb-item:hover img {
+  transform: scale(1.04);
+  filter: brightness(1) contrast(1.05);
+}
+.lb-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(13,11,9,0.85) 0%, transparent 100%);
+  transform: translateY(8px);
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.lb-item:hover .lb-caption { opacity: 1; transform: translateY(0); }
+.lb-tag {
+  position: absolute; top: 1rem; left: 1rem;
+  font-size: 0.55rem; letter-spacing: 0.4em; text-transform: uppercase;
+  background: rgba(13,11,9,0.7);
+  color: var(--oro);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(184,150,90,0.25);
+}
+
+/* ─── 12 · REPARACIÓN — Before/After slider ──────────────────────
+   [FIX-03] Reescrito. Problemas anteriores:
+   - imagen 'después' se deformaba al recortarse
+   - en móvil el handle desaparecía
+   - las etiquetas ANTES/DESPUÉS tenían z-index incorrecto
+   ─────────────────────────────────────────────────────────────── */
+.ba-container {
+  position: relative;
+  overflow: hidden;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Imagen base: ocupa todo el contenedor */
+.ba-base {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ba-base img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Capa "después": posición absoluta, recortada por width */
+.ba-after {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 50%;           /* controlado por JS */
+  overflow: hidden;
+}
+/* [FIX-03] La imagen dentro de ba-after debe tener ancho fijo
+   basado en el contenedor padre, no en ba-after (que se recorta) */
+.ba-after img {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: var(--ba-width, 100vw); /* actualizado por JS */
+  max-width: none;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Handle — línea vertical con botón circular */
+.ba-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--oro);
+  z-index: 10;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.ba-knob {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--noir-s);
+  border: 1px solid var(--oro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.ba-knob .ico { color: var(--oro); font-size: 0.75rem; }
+
+/* Etiquetas ANTES / DESPUÉS */
+.ba-label-before,
+.ba-label-after {
+  position: absolute;
+  bottom: 1rem;
+  font-family: var(--fb);
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  background: rgba(13,11,9,0.75);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(184,150,90,0.2);
+  color: var(--crema-a);
+  pointer-events: none;
+  z-index: 12;
+}
+.ba-label-before { left:  1rem; }
+.ba-label-after  { right: 1rem; }
+
+/* Tarjetas de pasos del proceso de reparación */
+.step-num {
+  font-family: var(--fd);
+  font-size: 4rem;
+  font-weight: 300;
+  color: rgba(184,150,90,0.06);
+  line-height: 1;
+  position: absolute;
+  top: -0.5rem; left: -0.5rem;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── 13 · PROCESO ────────────────────────────────────────────── */
+.proceso-bg {
+  background: var(--cognac);
+  position: relative;
+  overflow: hidden;
+}
+.proceso-bg::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    rgba(13,11,9,0.45) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* ─── 14 · FAQ / PREGUNTAS FRECUENTES ─────────────────────────── */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.faq-answer          { overflow: hidden; }
+.faq-answer.open     { display: block; animation: fadeDown var(--d2) var(--es); }
+.faq-icon            { transition: transform var(--d2) var(--es); }
+.faq-icon.rot        { transform: rotate(45deg); }
+.faq-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.faq-btn:focus-visible {
+  outline: 1px solid var(--oro);
+  outline-offset: 2px;
+}
+
+/* ─── 15 · FORMULARIO DE CONTACTO ─────────────────────────────── */
+.form-inp {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(184,150,90,0.16);
+  color: var(--crema);
+  font-family: var(--fb);
+  font-size: 0.875rem;
+  font-weight: 300;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition:
+    border-color var(--d2) ease,
+    box-shadow   var(--d2) ease,
+    background   var(--d2) ease;
+}
+.form-inp:focus {
+  border-color: rgba(184,150,90,0.5);
+  box-shadow: 0 0 0 1px rgba(184,150,90,0.2);
+  background: rgba(184,150,90,0.03);
+}
+.form-inp::placeholder { color: rgba(240,232,216,0.18); }
+select.form-inp        { appearance: none; -webkit-appearance: none; }
+
+/* ─── 16 · ÍCONOS DE SECCIÓN — Componente unificado ──────────────
+   [FIX-08] Nuevo componente: todos los íconos cuadrados de sección
+   usan esta clase. Borde, tamaño y color consistentes.
+   ─────────────────────────────────────────────────────────────── */
+.section-icon {
+  width: 3rem; height: 3rem;
+  border: 1px solid rgba(184,150,90,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--d2) ease;
+}
+.section-icon .ico {
+  color: rgba(240,232,216,0.55);
+  font-size: 0.9rem;
+  transition: color var(--d2) ease;
+}
+.section-icon:hover { border-color: var(--oro); }
+.section-icon:hover .ico { color: var(--oro); }
+
+/* ─── 17 · REDES SOCIALES — solo íconos [CAMBIO v3.1] ────────────
+   Sustituye los pills con texto por íconos limpios, como la referencia.
+   Área táctil de 44px; hover dorado con leve elevación.
+   ─────────────────────────────────────────────────────────────── */
+.soc-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  color: var(--crema); font-size: 1.45rem; text-decoration: none;
+  transition: color var(--d2) ease, transform var(--d2) var(--es);
+}
+.soc-icon:hover, .soc-icon:focus-visible { color: var(--oro); transform: translateY(-2px); }
+
+/* ─── 18 · FOOTER ─────────────────────────────────────────────── */
+.footer-link {
+  font-size: 0.75rem;
+  color: rgba(240,232,216,0.68);
+  text-decoration: none;
+  font-weight: 300;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--d1) ease;
+}
+.footer-link:hover { color: var(--oro); }
+
+/* ─── 19 · PRODUCTO CARD ──────────────────────────────────────── */
+.prod-card { position: relative; cursor: pointer; }
+.prod-card::after {
+  content: "";
+  position: absolute; bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: linear-gradient(to right, var(--oro), transparent);
+  transition: width var(--d3) var(--es);
+}
+.prod-card:hover::after { width: 100%; }
+
+/* ─── 20 · RESPONSIVE GENERAL ──────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Before/after con altura fija en móvil */
+  .ba-container { height: 300px; }
+}
+@media (max-width: 480px) {
+  .ba-container        { height: 240px; }
+  .ba-label-before,
+  .ba-label-after      { font-size: 0.48rem; padding: 0.2rem 0.5rem; }
+  .step-num            { display: none; }
+}
+
+/* ─── 21 · PRINT ──────────────────────────────────────────────── */
+@media print {
+  .wa-float, #navbar, .scroll-line { display: none; }
+}
+
+/* ─── [CAMBIO v3.3] Header fijo y menú móvil con CSS propio (sin depender de Tailwind) ─── */
+html, body { overflow-x: hidden; }
+#navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; -webkit-transform: translateZ(0); transform: translateZ(0); }
+#mobileMenu { display: none; max-height: calc(100vh - 5rem); overflow-y: auto; }
+#mobileMenu.is-open { display: block; }
+@media (min-width: 1024px) { #mobileMenu, #mobileMenu.is-open { display: none; } }
+
+/* ─── [CAMBIO v3.2] Íconos SVG inline, ajustes móviles y contraste ─── */
+html { scroll-padding-top: 5rem; }
+.ico { width: 1em; height: 1em; fill: currentColor; display: inline-block; vertical-align: -0.125em; flex-shrink: 0; }
+.spin { animation: icoSpin 1s linear infinite; }
+@keyframes icoSpin { to { transform: rotate(360deg); } }
+.btn .ico, .wa-float .ico { font-size: 1.05rem; }
+.btn .arr { font-size: .75rem; }
+/* En pantallas táctiles no existe hover: los textos del catálogo se muestran siempre */
+@media (hover: none) { .lb-caption { opacity: 1; transform: none; } }
+
+/* ─── [CAMBIO v3.4] Responsive completo (móvil · tablet · escritorio) ─── */
+html { -webkit-text-size-adjust: 100%; }
+@supports (height: 100svh) { .hero-section { min-height: 100svh; } }
+.lb-item { height: min(var(--h, 380px), 82vw); }          /* móvil: alto proporcional al ancho */
+.ba-container { touch-action: pan-y; }                    /* permite hacer scroll vertical sobre el comparador */
+address a, address p { overflow-wrap: anywhere; }         /* correos largos no desbordan */
+.footer-link { padding: .3rem 0; }                        /* área táctil más cómoda */
+.hero-content > p { text-wrap: pretty; }
+@media (min-width: 768px) { .lb-item { height: var(--h, 380px); } }
+@media (max-width: 1023px) { .js .rvl, .js .rvr { transform: translateY(32px); } }  /* sin desbordes horizontales */
+@media (max-width: 480px) {
+  .btn { white-space: normal; height: auto; min-height: 44px; padding: .65rem 1.25rem; letter-spacing: .2em; text-align: center; line-height: 1.35; max-width: 100%; }
+  #reparacion .grid-cols-2 p { font-size: .85rem !important; }
+}
+@media (max-width: 400px) { #contactForm .grid-cols-2 { grid-template-columns: 1fr; } }
+@media (max-width: 380px) { .hero-content span { letter-spacing: .3em !important; } }
+
+/* ─── [CAMBIO v3.5] Isotipo vectorial junto al nombre ─── */
+.brand { display: inline-flex; align-items: center; gap: .85rem; text-decoration: none; }
+.brand-mark { height: 2.1rem; width: auto; aspect-ratio: 2396 / 1471; fill: var(--crema); flex-shrink: 0; transition: fill var(--d2) ease; }
+.brand:hover .brand-mark { fill: var(--oro); }
+.brand-mark--lg { display: block; height: 2.6rem; margin-bottom: 1rem; }
+@media (max-width: 480px) { .brand { gap: .6rem; } .brand-mark { height: 1.55rem; } .brand-mark--lg { height: 2.2rem; } }
+@media (max-width: 360px) { .brand > span > span:last-child { letter-spacing: .26em !important; } }
+
+/* ─── Tailwind compilado (utilidades usadas) ─── */
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.\!container{width:100%!important}.container{width:100%}@media (min-width:640px){.\!container{max-width:640px!important}.container{max-width:640px}}@media (min-width:768px){.\!container{max-width:768px!important}.container{max-width:768px}}@media (min-width:1024px){.\!container{max-width:1024px!important}.container{max-width:1024px}}@media (min-width:1280px){.\!container{max-width:1280px!important}.container{max-width:1280px}}@media (min-width:1536px){.\!container{max-width:1536px!important}.container{max-width:1536px}}.visible{visibility:visible}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.bottom-10{bottom:2.5rem}.left-0{left:0}.right-0{right:0}.right-12{right:3rem}.top-0{top:0}.z-10{z-index:10}.z-50{z-index:50}.col-span-12{grid-column:span 12/span 12}.mx-auto{margin-left:auto;margin-right:auto}.mb-10{margin-bottom:2.5rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:.5rem}.mb-20{margin-bottom:5rem}.mb-3{margin-bottom:.75rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.ml-auto{margin-left:auto}.mt-14{margin-top:3.5rem}.mt-16{margin-top:4rem}.block{display:block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-20{height:5rem}.h-px{height:1px}.w-4{width:1rem}.w-6{width:1.5rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.flex-shrink{flex-shrink:1}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.resize{resize:both}.grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-10{gap:2.5rem}.gap-12{gap:3rem}.gap-16{gap:4rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.border{border-width:1px}.p-2{padding:.5rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-28{padding-top:7rem;padding-bottom:7rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-24{padding-bottom:6rem}.pb-6{padding-bottom:1.5rem}.pt-12{padding-top:3rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-xs{font-size:.75rem;line-height:1rem}.uppercase{text-transform:uppercase}.not-italic{font-style:normal}.leading-none{line-height:1}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.outline{outline-style:solid}.blur{--tw-blur:blur(8px)}.blur,.grayscale{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.grayscale{--tw-grayscale:grayscale(100%)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-filter{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}@media (min-width:640px){.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}}@media (min-width:768px){.md\:col-span-3{grid-column:span 3/span 3}.md\:col-span-4{grid-column:span 4/span 4}.md\:col-span-5{grid-column:span 5/span 5}.md\:col-span-6{grid-column:span 6/span 6}.md\:col-span-7{grid-column:span 7/span 7}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.lg\:block{display:block}.lg\:flex{display:flex}.lg\:hidden{display:none}.lg\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:gap-16{gap:4rem}.lg\:gap-20{gap:5rem}.lg\:gap-28{gap:7rem}.lg\:px-12{padding-left:3rem;padding-right:3rem}.lg\:py-36{padding-top:9rem;padding-bottom:9rem}.lg\:py-40{padding-top:10rem;padding-bottom:10rem}.lg\:pb-32{padding-bottom:8rem}}@media (min-width:1280px){.xl\:gap-10{gap:2.5rem}}
